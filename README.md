@@ -70,7 +70,3 @@ The script handles various error cases:
 - Missing search string or file
 - Non-existent input files
 - Invalid command options
-
-## License
-
-This project is open source and available under the MIT License.

@@ -9,6 +9,7 @@ A Bash script implementation of a grep-like command line tool that provides text
 - Inverted match option (-v)
 - Combined options support (-nv, -vn)
 - Helpful usage information (--help)
+- Also supported another version from help (-h)
 
 ## Installation
 

@@ -192,3 +192,50 @@ Here are potential reasons why `internal.example.com` might be unreachable, even
             sudo nmcli con down YourConnectionName && sudo nmcli con up YourConnectionName
             ```
         3.  Alternatively, use `nmtui` -> "Edit a connection" -> Select connection -> Edit -> IPv4 CONFIGURATION -> Change Method to "Manual", add DNS servers, set "Ignore automatically obtained DNS parameters" to YES. Save and reactivate the connection.
+
+## Troubleshooting Log & Findings
+
+During the execution of the troubleshooting steps, a foundational network connectivity issue was identified when attempting Step 2 (Diagnose Service Reachability).
+
+1.  **Action Taken:** Attempted to verify TCP connectivity to the assumed server IP (`192.168.1.100`) on port 80 from the client machine (`192.168.1.5`) using PowerShell.
+    ```powershell
+    Test-NetConnection -ComputerName 192.168.1.100 -Port 80
+    ```
+2.  **Result:** The command failed, indicating no basic network path could be established. Key outputs were:
+    *   `PingSucceeded : False`
+    *   `PingReplyDetails: DestinationHostUnreachable`
+    *   `TcpTestSucceeded : False`
+3.  **Conclusion:** The `DestinationHostUnreachable` error signifies a network-level problem (Potential Cause #5: Network Connectivity Issue). The client machine cannot find a route to the target server IP address. This prevents *any* communication, including basic pings or TCP connections to specific ports.
+4.  **Impact:** This fundamental network issue blocks the progression to subsequent troubleshooting steps outlined in the scenario, such as comparing DNS resolution results for `internal.example.com` or testing the web service specifically with `curl`/`telnet`, as the target host is unreachable at the IP layer from this client.
+
+## Expected Troubleshooting Workflow (If Basic Connectivity Existed)
+
+Had the basic network connectivity (ping and `Test-NetConnection` to the IP) been successful, the troubleshooting process would typically proceed as follows:
+
+1.  **Verify DNS Resolution (Step 1):**
+    *   Use `nslookup internal.example.com` to query default DNS.
+    *   Use `nslookup internal.example.com 8.8.8.8` to query public DNS.
+    *   **Analyze:** If default fails but public succeeds, suspect internal DNS server/record issues. If both fail, suspect domain non-existence or broader DNS problems. If default returns the wrong IP, suspect an incorrect internal DNS record.
+2.  **Diagnose Service Reachability (Step 2 - Refined):**
+    *   If DNS resolved correctly to an IP (e.g., `192.168.1.100`), use `Test-NetConnection -ComputerName 192.168.1.100 -Port <80_or_443>` (or `curl`/`telnet` equivalents).
+    *   **Analyze:** If the connection to the *correct IP* on the *correct port* fails (`TcpTestSucceeded: False`), suspect a firewall (client, network, or server) blocking the specific port, or the web service itself not running/listening correctly on the server.
+3.  **Identify Cause & Fix (Steps 3 & 4):**
+    *   Based on the combined results of DNS and port connectivity tests, pinpoint the most likely cause from the list (e.g., DNS server failure, incorrect DNS record, firewall block, service down).
+    *   Apply the corresponding fix (e.g., restart DNS/web service, correct DNS record, adjust firewall rules).
+4.  **Verify Fix:** Clear DNS cache (`ipconfig /flushdns`) and re-test access via the browser using the domain name `internal.example.com`.
+
+### 1. Verify DNS Resolution
+
+1.  **Verify DNS Resolution (Step 1):**
+    *   Use `nslookup internal.example.com` to query default DNS.
+    *   Use `nslookup internal.example.com 8.8.8.8` to query public DNS.
+    *   **Analyze:** If default fails but public succeeds, suspect internal DNS server/record issues. If both fail, suspect domain non-existence or broader DNS problems. If default returns the wrong IP, suspect an incorrect internal DNS record.
+2.  **Diagnose Service Reachability (Step 2 - Refined):**
+    *   If DNS resolved correctly to an IP (e.g., `192.168.1.100`), use `Test-NetConnection -ComputerName 192.168.1.100 -Port <80_or_443>` (or `curl`/`telnet` equivalents).
+    *   **Analyze:** If the connection to the *correct IP* on the *correct port* fails (`TcpTestSucceeded: False`), suspect a firewall (client, network, or server) blocking the specific port, or the web service itself not running/listening correctly on the server.
+3.  **Identify Cause & Fix (Steps 3 & 4):**
+    *   Based on the combined results of DNS and port connectivity tests, pinpoint the most likely cause from the list (e.g., DNS server failure, incorrect DNS record, firewall block, service down).
+    *   Apply the corresponding fix (e.g., restart DNS/web service, correct DNS record, adjust firewall rules).
+4.  **Verify Fix:** Clear DNS cache (`ipconfig /flushdns`) and re-test access via the browser using the domain name `internal.example.com`.
+
+### 1. Verify DNS Resolution

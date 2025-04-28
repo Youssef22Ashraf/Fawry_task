@@ -12,6 +12,7 @@ A Bash script implementation of a grep-like command line tool that provides text
 - List filenames with matches option (-l)
 - Combined options support (-nv, -vn, etc.)
 - Helpful usage information (--help)
+- Also supported another version from help (-h)
 
 ## Installation
 
@@ -175,4 +176,6 @@ The script handles various error cases:
 - Non-existent input files
 - Invalid command options
 
-## thank you for your time, have a nice day.
+## License
+
+This project is open source and available under the MIT License.
